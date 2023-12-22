@@ -1,7 +1,7 @@
-import { Schema, model } from "mongoose";
+import mongoose from "mongoose";
 import bcryptjs from 'bcryptjs';
 
-const userSchema = new Schema({
+const userSchema = new mongoose.Schema({
     email:{
         type: String, 
         required: true,
@@ -21,7 +21,7 @@ userSchema.pre("save", async function(next){
    const user = this;
 
 
-   if(!user.isModified('password')) return next()
+   if(!user.isModified("password")) return next()
 
     try {
        const salt = await bcryptjs.genSalt(15);
@@ -34,4 +34,11 @@ userSchema.pre("save", async function(next){
     }
 })
 
-export const User = model('User', userSchema);
+
+//comparar las password enviada desde front con la del schema de la base de datos
+userSchema.methods.comparePassword = async function(candidatePassword){
+    return await bcryptjs.compare(candidatePassword, this.password);
+}
+
+
+export const User = mongoose.model('User', userSchema);
